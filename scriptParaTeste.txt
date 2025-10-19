@@ -1,0 +1,45 @@
+use monitora;
+
+-- ====== EMPRESA ======
+INSERT INTO empresas (idEmpresa, nome, senha, cnpj, ativo, aprovada, data_cadastro)
+VALUES (1, 'Empresa Teste', '123', '12345678000100', 1, 1, NOW());
+
+-- ====== ENDERECO ======
+INSERT INTO endereco (idEndereco, pais, estado, cidade, bairro, rua, numero)
+VALUES (1, 'Brasil', 'SP', 'São Paulo', 'Centro', 'Rua Teste', 100);
+
+-- ====== DATACENTER ======
+INSERT INTO datacenters (idDataCenter, data_cadastro, FkEmpresa, FkEndereco)
+VALUES (1, NOW(), 1, 1);
+
+-- ====== SERVIDOR ======
+INSERT INTO servidores (idServidor, nome, data_cadastro, FkDataCenter)
+VALUES (1, 'Servidor_01', NOW(), 1);
+
+-- ====== NOME COMPONENTE ======
+INSERT INTO nome_componente (id, componente)
+VALUES 
+(1, 'CPU'),
+(2, 'RAM'),
+(3, 'DISCO');
+
+-- ====== MEDIDA ======
+INSERT INTO medida (id, unidade_de_medida)
+VALUES
+(1, '%'),
+(2, '%'),
+(3, '%');
+
+-- ====== PARAMETROS (LIMITES) ======
+INSERT INTO parametros (id, limite)
+VALUES
+(1, 90), 
+(2, 95), 
+(3, 70);  
+
+-- ====== COMPONENTES MONITORADOS ======
+INSERT INTO componentes_monitorados (idComponente, nome_componente_id, servidores_idServidor, medida_id, parametros_id)
+VALUES
+(1, 1, 1, 1, 1),  -- CPU
+(2, 2, 1, 2, 2),  -- RAM
+(3, 3, 1, 3, 3);  -- DISCO
