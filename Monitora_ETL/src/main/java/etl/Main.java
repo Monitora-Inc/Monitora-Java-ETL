@@ -1,6 +1,7 @@
 package etl;
-
 import java.sql.*;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Main {
@@ -11,6 +12,9 @@ public class Main {
 
     public static void main(String[] args) {
         try (Connection conn = DriverManager.getConnection(URL, USER, SENHA)) {
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            SimpleDateFormat dataFormatada = new SimpleDateFormat("dd_MM_yyyy_HH_mm");
+            String formattedDate = dataFormatada.format(timestamp);
 
             //extraindo CSV
             Extrair extrair = new Extrair();
@@ -30,7 +34,7 @@ public class Main {
 
             //gerar novo CSV com dados tratados
             Carregar carregar = new Carregar();
-            carregar.carregarParaCSV(dadosTransformados, "saidaETLServer"+ idServidor+".csv");
+            carregar.carregarParaCSV(dadosTransformados, "saidaServer"+ idServidor+ "_"+formattedDate + ".csv");
 
             System.out.println("ETL executada com sucesso!");
         } catch (SQLException e) {
