@@ -18,7 +18,7 @@ public class Main {
 
             //extraindo CSV
             Extrair extrair = new Extrair();
-            List<String[]> dados = extrair.extrairDadosCSV("src\\csvs\\captura_C0D000.csv");
+            List<String[]> dados = extrair.extrairDadosCSV("src\\csvs\\Exemplo-Jira.csv");
 
             //pegando o id do servidor no csv
             int idServidor = Integer.parseInt(dados.get(1)[0]);
@@ -39,6 +39,8 @@ public class Main {
             System.out.println("ETL executada com sucesso!");
         } catch (SQLException e) {
             System.out.println("Erro de conexão: " + e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
