@@ -1,8 +1,10 @@
 package etl;
+
+import java.io.File;
 import java.sql.*;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 public class Main {
 
@@ -12,29 +14,62 @@ public class Main {
 
     public static void main(String[] args) {
         try (Connection conn = DriverManager.getConnection(URL, USER, SENHA)) {
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            SimpleDateFormat dataFormatada = new SimpleDateFormat("dd_MM_yyyy_HH_mm");
-            String formattedDate = dataFormatada.format(timestamp);
 
-            //extraindo CSV
+            //vai procurar o último CSV da pasta
+            File pasta = new File("src/csvs/");
+            //lista os arquivos da pasta que terminam com .csv
+            File[] arquivos = pasta.listFiles((dir, nome) -> nome.endsWith(".csv"));
+
+
+            if (arquivos == null || arquivos.length == 0) {
+                throw new RuntimeException("Sem arquivos para ler na pasta src/csvs/");
+            }
+
+            File ultimoArquivo = null;
+            long ultimaModificacao = 0;
+            for (File arquivo : arquivos) {
+                if (arquivo.lastModified() > ultimaModificacao) {
+                    ultimoArquivo = arquivo;
+                    ultimaModificacao = arquivo.lastModified();
+                }
+            }
+
+            System.out.println("Lendo arquivo: " + ultimoArquivo.getName());
+
+            // extraindo CSV
             Extrair extrair = new Extrair();
-            List<String[]> dados = extrair.extrairDadosCSV("src\\csvs\\Exemplo-Jira.csv");
+            List<String[]> dados = extrair.extrairDadosCSV(ultimoArquivo.getAbsolutePath());
 
-            //pegando o id do servidor no csv
-            int idServidor = Integer.parseInt(dados.get(1)[0]);
+            if (dados == null || dados.isEmpty()) {
+                throw new RuntimeException(
+                        "Nenhum dado foi lido. Verifique o caminho ou o conteúdo do arquivo.");
+            }
+
+            // data e hora da captura
+            String dataCsv = dados.get(1)[1];
+            SimpleDateFormat formatoCSV = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date data = formatoCSV.parse(dataCsv);
+            SimpleDateFormat dataFormatada = new SimpleDateFormat("dd_MM_yyyy_HH_mm");
+            String formattedDate = dataFormatada.format(data);
+
+            // pegando o id do servidor no csv
+            String idServidor = dados.get(1)[0];
             System.out.println("ID do servidor do CSV: " + idServidor);
 
-            //buscando limites no banco
+            // buscando limites no banco
             ParametroDAO parametroDAO = new ParametroDAO(conn);
-            Map<String, Integer> limites = parametroDAO.buscarLimites(idServidor);
+            Map<String, Map<String, Integer>> limites = parametroDAO.buscarLimites(idServidor);
+            Map<String, Integer> limitesCriticos = limites.get("critico");
+            Map<String, Integer> limitesAtencao = limites.get("atencao");
 
             // transforma com base nos limites do banco
-            Transformar transformar = new Transformar(limites);
+            Transformar transformar = new Transformar(limitesCriticos, limitesAtencao);
             List<String[]> dadosTransformados = transformar.transformar(dados);
 
-            //gerar novo CSV com dados tratados
+            // gera novo CSV com dados tratados
             Carregar carregar = new Carregar();
-            carregar.carregarParaCSV(dadosTransformados, "saidaServer"+ idServidor+ "_"+formattedDate + ".csv");
+            carregar.carregarParaCSV(dadosTransformados,
+                    "src\\csvsTratados\\server" + idServidor + "_" + formattedDate + ".csv");
 
             System.out.println("ETL executada com sucesso!");
         } catch (SQLException e) {

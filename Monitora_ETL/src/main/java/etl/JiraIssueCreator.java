@@ -14,13 +14,13 @@ public class JiraIssueCreator {
     private static final String USERNAME = "monitora373@gmail.com";
     private static final String PROJECT_KEY = "MONA"; //
 
-    public static void criarAlertaAtencao(int idServidor, String componente, String DataHora) throws Exception {
+    public static void criarAlertaAtencao(String idServidor, String componente, String DataHora) throws Exception {
         String mensagem = "ATENÇÃO: "+componente+" - Servidor "+idServidor;
         String prioridade = "High";
         criarChamadoJira(mensagem, prioridade, componente, DataHora);
     }
 
-    public static void criarAlertaCritico(int idServidor, String componente, String DataHora) throws Exception {
+    public static void criarAlertaCritico(String idServidor, String componente, String DataHora) throws Exception {
         String mensagem = "ALERTA CRÍTICO: "+componente+" - Servidor "+idServidor;
         String prioridade = "Highest";
         criarChamadoJira(mensagem, prioridade, componente, DataHora);
