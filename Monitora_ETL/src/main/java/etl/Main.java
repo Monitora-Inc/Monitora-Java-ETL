@@ -16,60 +16,53 @@ public class Main {
         try (Connection conn = DriverManager.getConnection(URL, USER, SENHA)) {
 
             //vai procurar o último CSV da pasta
-            File pasta = new File("src/csvs/");
+            File pasta = new File("src/Buckets/Raw/");
             //lista os arquivos da pasta que terminam com .csv
             File[] arquivos = pasta.listFiles((dir, nome) -> nome.endsWith(".csv"));
 
 
             if (arquivos == null || arquivos.length == 0) {
-                throw new RuntimeException("Sem arquivos para ler na pasta src/csvs/");
+                throw new RuntimeException("Sem arquivos para ler na pasta " + pasta);
             }
 
-            File ultimoArquivo = null;
-            long ultimaModificacao = 0;
             for (File arquivo : arquivos) {
-                if (arquivo.lastModified() > ultimaModificacao) {
-                    ultimoArquivo = arquivo;
-                    ultimaModificacao = arquivo.lastModified();
+                System.out.println("Lendo arquivo: " + arquivo.getName());
+
+                // extraindo CSV
+                Extrair extrair = new Extrair();
+                List<String[]> dados = extrair.extrairDadosCSV(arquivo.getAbsolutePath());
+
+                if (dados == null || dados.isEmpty()) {
+                    throw new RuntimeException(
+                            "Nenhum dado foi lido. Verifique o caminho ou o conteúdo do arquivo.");
                 }
-            }
 
-            System.out.println("Lendo arquivo: " + ultimoArquivo.getName());
+                // data e hora da captura
+                String dataCsv = dados.get(1)[1];
+                SimpleDateFormat formatoCSV = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date data = formatoCSV.parse(dataCsv);
+                SimpleDateFormat dataFormatada = new SimpleDateFormat("dd_MM_yyyy_HH_mm");
+                String formattedDate = dataFormatada.format(data);
 
-            // extraindo CSV
-            Extrair extrair = new Extrair();
-            List<String[]> dados = extrair.extrairDadosCSV(ultimoArquivo.getAbsolutePath());
+                // pegando o id do servidor no csv
+                String idServidor = dados.get(1)[0];
+                System.out.println("ID do servidor do CSV: " + idServidor);
 
-            if (dados == null || dados.isEmpty()) {
-                throw new RuntimeException(
-                        "Nenhum dado foi lido. Verifique o caminho ou o conteúdo do arquivo.");
-            }
+                // buscando limites no banco
+                ParametroDAO parametroDAO = new ParametroDAO(conn);
+                Map<String, Map<String, Integer>> limites = parametroDAO.buscarLimites(idServidor);
+                Map<String, Integer> limitesCriticos = limites.get("critico");
+                Map<String, Integer> limitesAtencao = limites.get("atencao");
 
-            // data e hora da captura
-            String dataCsv = dados.get(1)[1];
-            SimpleDateFormat formatoCSV = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date data = formatoCSV.parse(dataCsv);
-            SimpleDateFormat dataFormatada = new SimpleDateFormat("dd_MM_yyyy_HH_mm");
-            String formattedDate = dataFormatada.format(data);
+                // transforma com base nos limites do banco
+                Transformar transformar = new Transformar(limitesCriticos, limitesAtencao);
+                List<String[]> dadosTransformados = transformar.transformar(dados);
 
-            // pegando o id do servidor no csv
-            String idServidor = dados.get(1)[0];
-            System.out.println("ID do servidor do CSV: " + idServidor);
-
-            // buscando limites no banco
-            ParametroDAO parametroDAO = new ParametroDAO(conn);
-            Map<String, Map<String, Integer>> limites = parametroDAO.buscarLimites(idServidor);
-            Map<String, Integer> limitesCriticos = limites.get("critico");
-            Map<String, Integer> limitesAtencao = limites.get("atencao");
-
-            // transforma com base nos limites do banco
-            Transformar transformar = new Transformar(limitesCriticos, limitesAtencao);
-            List<String[]> dadosTransformados = transformar.transformar(dados);
-
-            // gera novo CSV com dados tratados
+                // gera novo CSV com dados tratados
                 Carregar carregar = new Carregar();
                 carregar.carregarParaCSV(dadosTransformados,
                         idServidor, formattedDate);
+            }
 
             System.out.println("ETL executada com sucesso!");
         } catch (SQLException e) {
