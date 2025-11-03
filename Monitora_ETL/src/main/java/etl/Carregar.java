@@ -8,7 +8,7 @@ public class Carregar {
     public void carregarParaCSV(List<String[]> dados, String caminhoSaida) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(caminhoSaida))) {
 
-            writer.write("id;timestamp;cpu;ram;disco;usoRede;latencia;qtdProcessos;statusCpu;statusRam;statusDisco");
+            writer.write("id;timestamp;cpu;ram;disco;usoRede;latencia;qtdProcessos;statusCpu;statusRam;statusDisco;statusUsoRede;statusLatencia");
             writer.newLine();
 
             for (String[] linha : dados) {

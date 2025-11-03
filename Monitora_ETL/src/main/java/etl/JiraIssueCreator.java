@@ -12,7 +12,7 @@ public class JiraIssueCreator {
     private static final String JIRA_URL = "https://sptech-team-lpyjf1yr.atlassian.net";
     private static final String API_TOKEN = "";
     private static final String USERNAME = "monitora373@gmail.com";
-    private static final String PROJECT_KEY = "MONA"; //
+    private static final String PROJECT_KEY = "MONA";
 
     public static void criarAlertaAtencao(String idServidor, String componente, String DataHora) throws Exception {
         String mensagem = "ATENÇÃO: "+componente+" - Servidor "+idServidor;
@@ -27,21 +27,17 @@ public class JiraIssueCreator {
     }
 
     public static void criarChamadoJira(String mensagem, String prioridade, String componente, String DataHora) throws Exception {
-        //Endpoint REST
         URL url = new URL(JIRA_URL + "/rest/api/3/issue");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-        //Autenticação (Basic Auth com Base64)
         String authString = USERNAME + ":" + API_TOKEN;
         String encodedAuth = Base64.getEncoder().encodeToString(authString.getBytes());
 
-        //Configuração da Conexão
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Authorization", "Basic " + encodedAuth);
         conn.setRequestProperty("Content-Type", "application/json");
-        conn.setDoOutput(true); // Indica que estamos enviando dados no corpo da requisição
+        conn.setDoOutput(true);
 
-        //Corpo da Requisição (Payload JSON)
         String jsonInputString = String.format(
                 "{"
                         + "\"fields\": {"
@@ -72,17 +68,14 @@ public class JiraIssueCreator {
                 PROJECT_KEY
         );
 
-        //Envio dos Dados
         try (OutputStream os = conn.getOutputStream()) {
             byte[] input = jsonInputString.getBytes("utf-8");
             os.write(input, 0, input.length);
         }
 
-        //Leitura da Resposta
         int responseCode = conn.getResponseCode();
         System.out.println("Código de Resposta: " + responseCode);
 
-        // Se o chamado foi criado com sucesso (código 201)
         if (responseCode == HttpURLConnection.HTTP_CREATED) {
             Scanner scanner = new Scanner(conn.getInputStream());
             String response = scanner.useDelimiter("\\A").next();
@@ -90,7 +83,6 @@ public class JiraIssueCreator {
             System.out.println("Chamado criado com sucesso! Detalhes:");
             System.out.println(response);
         } else {
-            // Leitura da mensagem de erro se o código não for 201
             Scanner scanner = new Scanner(conn.getErrorStream());
             String errorResponse = scanner.useDelimiter("\\A").next();
             scanner.close();

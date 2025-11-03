@@ -17,12 +17,17 @@ public class Transformar {
     public List<String[]> transformar(List<String[]> dadosBrutos) throws Exception {
         List<String[]> dadosTratados = new ArrayList<>();
 
-        int contadorForaLimiteCriticoCPU = 0;
-        int contadorForaLimiteAtencaoCPU = 0;
-        int contadorForaLimiteCriticoRAM = 0;
-        int contadorForaLimiteAtencaoRAM = 0;
-        int contadorForaLimiteCriticoDisco = 0;
-        int contadorForaLimiteAtencaoDisco = 0;
+        int contCPU = 0;
+        int contRAM = 0;
+        int contDisco = 0;
+        int contUsoRede = 0;
+        int contLatencia = 0;
+
+        boolean criticoCPU = false;
+        boolean criticoRAM = false;
+        boolean criticoDisco = false;
+        boolean criticoUsoRede = false;
+        boolean criticoLatencia = false;
 
         for (String[] col : dadosBrutos) {
 
@@ -54,68 +59,115 @@ public class Transformar {
             int qtdProcessos = (int) parseDouble(col[7]);
 
             // busca limites do banco mas se não houver define valores padrao
-            int limiteCpuCritico = limitesCriticos.getOrDefault("CPU", 80);
-            int limiteCpuAtencao = limitesAtencao.getOrDefault("CPU", 70);
+            int limiteCpuCritico = limitesCriticos.getOrDefault("CPU%", 90000) / 1000;
+            int limiteCpuAtencao = limitesAtencao.getOrDefault("CPU%", 80000) / 1000;
 
-            int limiteRamCritico = limitesCriticos.getOrDefault("RAM", 85);
-            int limiteRamAtencao = limitesAtencao.getOrDefault("RAM", 75);
+            int limiteRamCritico = limitesCriticos.getOrDefault("RAM%", 85000) / 1000;
+            int limiteRamAtencao = limitesAtencao.getOrDefault("RAM%", 75000) / 1000;
 
-            int limiteDiscoCritico = limitesCriticos.getOrDefault("DISCO", 90);
-            int limiteDiscoAtencao = limitesAtencao.getOrDefault("DISCO", 80);
+            int limiteDiscoCritico = limitesCriticos.getOrDefault("Disco%", 95000) / 1000;
+            int limiteDiscoAtencao = limitesAtencao.getOrDefault("Disco%", 85000) / 1000;
+
+            int limiteUsoRedeCritico = limitesCriticos.getOrDefault("Rede%", 90000) / 1000;
+            int limiteUsoRedeAtencao = limitesAtencao.getOrDefault("Rede%", 80000) / 1000;
+
+            int xlimiteLatenciaCritico = limitesCriticos.getOrDefault("Redems", 50);
+            int xlimiteLatenciaAtencao = limitesAtencao.getOrDefault("Redems", 40);
+            Double limiteLatenciaCritico = parseDouble(String.valueOf(xlimiteLatenciaCritico)) / 1000;
+            Double limiteLatenciaAtencao = parseDouble(String.valueOf(xlimiteLatenciaAtencao)) / 1000;
+
 
             String statusCpu = getNivelAlerta(cpu, limiteCpuAtencao, limiteCpuCritico);
-            if (cpu >= limiteCpuCritico) {
-                contadorForaLimiteCriticoCPU++;
-                if ((contadorForaLimiteCriticoCPU == 5
-                        || contadorForaLimiteCriticoCPU + contadorForaLimiteAtencaoCPU == 5)
-                                && contadorForaLimiteCriticoCPU > 0) {
-                    criarAlertaCritico(id, "CPU", timestamp);
-                }
-            } else if (cpu >= limiteCpuAtencao) {
-                contadorForaLimiteAtencaoCPU++;
-                if (contadorForaLimiteAtencaoCPU == 5) {
-                    criarAlertaAtencao(id, "CPU", timestamp);
+            if (cpu >= limiteCpuAtencao) {
+                contCPU++;
+                if (cpu >= limiteCpuCritico) {
+                    criticoCPU = true;
                 }
             } else {
-                contadorForaLimiteCriticoCPU = 0;
-                contadorForaLimiteAtencaoCPU = 0;
+                criticoCPU = false;
+                contCPU = 0;
+            }
+
+            if (contCPU == 5) {
+                if (criticoCPU) {
+                    criarAlertaCritico(id, "CPU", timestamp);
+                } else {
+                    criarAlertaAtencao(id, "CPU", timestamp);
+                }
             }
 
             String statusRam = getNivelAlerta(ram, limiteRamAtencao, limiteRamCritico);
-            if (ram > limiteRamCritico) {
-                contadorForaLimiteCriticoRAM++;
-                if (contadorForaLimiteCriticoRAM == 5
-                        || contadorForaLimiteCriticoRAM + contadorForaLimiteAtencaoRAM == 5
-                                && contadorForaLimiteCriticoRAM > 0) {
-                    criarAlertaCritico(id, "Memória RAM", timestamp);
-                }
-            } else if (ram > limiteRamAtencao) {
-                contadorForaLimiteAtencaoRAM++;
-                if (contadorForaLimiteAtencaoRAM == 5) {
-                    criarAlertaAtencao(id, "Memória RAM", timestamp);
+            if (ram >= limiteRamAtencao) {
+                contRAM++;
+                if (ram >= limiteRamCritico) {
+                    criticoRAM = true;
                 }
             } else {
-                contadorForaLimiteCriticoRAM = 0;
-                contadorForaLimiteAtencaoRAM = 0;
+                criticoRAM = false;
+                contRAM = 0;
+            }
+            if (contRAM == 5) {
+                if (criticoRAM) {
+                    criarAlertaCritico(id, "Memória RAM", timestamp);
+                } else {
+                    criarAlertaAtencao(id, "Memória RAM", timestamp);
+                }
             }
 
             String statusDisco = getNivelAlerta(disco, limiteDiscoAtencao, limiteDiscoCritico);
-            if (disco > limiteDiscoCritico) {
-                contadorForaLimiteCriticoDisco++;
-                if (contadorForaLimiteCriticoDisco == 5
-                        || contadorForaLimiteCriticoDisco + contadorForaLimiteAtencaoDisco == 5
-                                && contadorForaLimiteCriticoDisco > 0) {
-                    criarAlertaCritico(id, "Disco", timestamp);
-                }
-            } else if (disco > limiteDiscoAtencao) {
-                contadorForaLimiteAtencaoDisco++;
-                if (contadorForaLimiteAtencaoDisco == 5) {
-                    criarAlertaAtencao(id, "Disco", timestamp);
+            if (disco >= limiteDiscoAtencao) {
+                contDisco++;
+                if (disco >= limiteDiscoCritico) {
+                    criticoDisco = true;
                 }
             } else {
-                contadorForaLimiteCriticoDisco = 0;
-                contadorForaLimiteAtencaoDisco = 0;
+                criticoDisco = false;
+                contDisco = 0;
             }
+            if (contDisco == 5) {
+                if (criticoDisco) {
+                    criarAlertaCritico(id, "Disco", timestamp);
+                } else {
+                    criarAlertaAtencao(id, "Disco", timestamp);
+                }
+            }
+
+            String statusUsoRede = getNivelAlerta(usoRede, limiteUsoRedeAtencao, limiteUsoRedeCritico);
+            if (usoRede >= limiteUsoRedeAtencao) {
+                contUsoRede++;
+                if (usoRede >= limiteUsoRedeCritico) {
+                    criticoUsoRede = true;
+                }
+            } else {
+                criticoUsoRede = false;
+                contUsoRede = 0;
+            }
+            if (contUsoRede == 5) {
+                if (criticoUsoRede) {
+                    criarAlertaCritico(id, "Uso de Rede", timestamp);
+                } else {
+                    criarAlertaAtencao(id, "Uso de Rede", timestamp);
+                }
+            }
+
+            String statusLatencia = getNivelAlerta(latencia, limiteLatenciaAtencao, limiteLatenciaCritico);
+            if (latencia >= limiteLatenciaAtencao) {
+                contLatencia++;
+                if (latencia >= limiteLatenciaCritico) {
+                    criticoLatencia = true;
+                }
+            } else {
+                criticoLatencia = false;
+                contLatencia = 0;
+            }
+            if (contLatencia == 5) {
+                if (criticoLatencia) {
+                    criarAlertaCritico(id, "Latência", timestamp);
+                } else {
+                    criarAlertaAtencao(id, "Latência", timestamp);
+                }
+            }
+
 
             dadosTratados.add(new String[] {
                     String.valueOf(id), timestamp,
@@ -125,7 +177,7 @@ public class Transformar {
                     String.valueOf(usoRede),
                     String.valueOf(latencia),
                     String.valueOf(qtdProcessos),
-                    statusCpu, statusRam, statusDisco
+                    statusCpu, statusRam, statusDisco, statusUsoRede, statusLatencia
             });
         }
 
