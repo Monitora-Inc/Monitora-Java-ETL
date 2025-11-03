@@ -67,9 +67,9 @@ public class Main {
             List<String[]> dadosTransformados = transformar.transformar(dados);
 
             // gera novo CSV com dados tratados
-            Carregar carregar = new Carregar();
-            carregar.carregarParaCSV(dadosTransformados,
-                    "src\\csvsTratados\\server" + idServidor + "_" + formattedDate + ".csv");
+                Carregar carregar = new Carregar();
+                carregar.carregarParaCSV(dadosTransformados,
+                        idServidor, formattedDate);
 
             System.out.println("ETL executada com sucesso!");
         } catch (SQLException e) {
