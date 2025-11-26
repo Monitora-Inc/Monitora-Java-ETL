@@ -14,19 +14,19 @@ public class JiraIssueCreator {
     private static final String USERNAME = "monitora373@gmail.com";
     private static final String PROJECT_KEY = "MONA";
 
-    public static void criarAlertaAtencao(String idServidor, String componente, String DataHora) throws Exception {
+    public static void criarAlertaAtencao(String idServidor, String componente, String DataHora, double valorCapturado, String parametro, String unidadeMedida) throws Exception {
         String mensagem = "ATENÇÃO: "+componente+" - Servidor "+idServidor;
         String prioridade = "High";
-        criarChamadoJira(mensagem, prioridade, componente, DataHora);
+        criarChamadoJira(mensagem, prioridade, componente, DataHora, idServidor, valorCapturado, parametro, unidadeMedida);
     }
 
-    public static void criarAlertaCritico(String idServidor, String componente, String DataHora) throws Exception {
+    public static void criarAlertaCritico(String idServidor, String componente, String DataHora, double valorCapturado, String parametro, String unidadeMedida) throws Exception {
         String mensagem = "ALERTA CRÍTICO: "+componente+" - Servidor "+idServidor;
         String prioridade = "Highest";
-        criarChamadoJira(mensagem, prioridade, componente, DataHora);
+        criarChamadoJira(mensagem, prioridade, componente, DataHora, idServidor, valorCapturado, parametro, unidadeMedida);
     }
 
-    public static void criarChamadoJira(String mensagem, String prioridade, String componente, String DataHora) throws Exception {
+    public static void criarChamadoJira(String mensagem, String prioridade, String componente, String DataHora, String idServidor, double valorCapturado, String parametro, String unidadeMedida) throws Exception {
         URL url = new URL(JIRA_URL + "/rest/api/3/issue");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
@@ -38,35 +38,37 @@ public class JiraIssueCreator {
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
 
-        String jsonInputString = String.format(
-                "{"
+        String jsonInputString = String.format("{"
                         + "\"fields\": {"
                         + "  \"project\": {"
                         + "    \"key\": \"%s\""
                         + "  },"
-                        + "  \"summary\": \""+mensagem+"\"," // Título (Título do alerta que vai aparecer no slack)
+                        + "  \"summary\": \"" + mensagem + "\","
                         + "  \"description\": {"
                         + "    \"type\": \"doc\","
                         + "    \"version\": 1,"
                         + "    \"content\": [{"
                         + "      \"type\": \"paragraph\","
                         + "      \"content\": [{"
-                        + "        \"text\": \"O componente "+componente+" ultrapassou os parâmetros definidos." +
-                        "\\nData e Hora da ocorrência: "+DataHora+"\"," // Descrição (Mensagem que vai aparecer no slack)
+                        + "        \"text\": \"O componente " + componente + " ultrapassou os parâmetros definidos."
+                        + "\\nData e Hora da ocorrência: " + DataHora
+                        + "\\nServidor: " + idServidor
+                        + "\\nValor capturado: " + valorCapturado + unidadeMedida
+                        + "\\nParâmetro definido: " + parametro + unidadeMedida + "\","
                         + "        \"type\": \"text\""
                         + "      }]"
                         + "    }]"
                         + "  },"
                         + "  \"issuetype\": {"
-                        + "    \"name\": \"[System] Incident\"" // Tipo de Issue (Task, Bug, Story, etc.)
+                        + "    \"name\": \"[System] Incident\""
                         + "  },"
                         + "  \"priority\": {"
-                        + "    \"name\": \""+prioridade+"\"" // Prioridade da Issue (Highest = alerta critico, High = alerta atenção)
-                        + "  }"
+                        + "    \"name\": \"" + prioridade + "\""
+                        + "  },"
+                        + "  \"customfield_10010\": \"240\""
                         + "}"
                         + "}",
-                PROJECT_KEY
-        );
+                PROJECT_KEY);
 
         try (OutputStream os = conn.getOutputStream()) {
             byte[] input = jsonInputString.getBytes("utf-8");

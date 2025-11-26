@@ -8,14 +8,13 @@ import java.util.Date;
 
 public class Main {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/monitora?useSSL=false&serverTimezone=America/Sao_Paulo";
+    private static final String URL = "jdbc:mysql://52.22.36.133:3306/monitora?useSSL=false&serverTimezone=America/Sao_Paulo";
     private static final String USER = "monitora";
     private static final String SENHA = "monitora@1234";
 
     public static void main(String[] args) {
         try (Connection conn = DriverManager.getConnection(URL, USER, SENHA)) {
 
-            //vai procurar o último CSV da pasta
             File pasta = new File("src/Buckets/Raw/");
             //lista os arquivos da pasta que terminam com .csv
             File[] arquivos = pasta.listFiles((dir, nome) -> nome.endsWith(".csv"));
