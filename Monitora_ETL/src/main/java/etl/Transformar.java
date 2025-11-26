@@ -255,4 +255,5 @@ public class Transformar {
             return "NORMAL";
         }
     }
+
 }

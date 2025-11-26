@@ -22,7 +22,7 @@ public class Carregar {
         boolean arquivoExiste = arquivo.exists();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(arquivo, true))) {
             if (!arquivoExiste) {
-                writer.write("id;timestamp;cpu;ram;disco;usoRede;latencia;qtdProcessos;statusCpu;statusRam;statusDisco;statusUsoRede;statusLatencia");
+                writer.write("id;timestamp;cpu;total_ram;ram_usada;ram_percent;ram_quente;ram_fria;disco_percent;bytesEnv;bytesRecb;usoRedeMb;latencia;pacotes_enviados;pacotes_recebidos;pacotes_perdidos;qtd_processos;uptime_segundos;statusCpu;statusRam;statusDisco;statusUsoRede;statusLatencia");
                 writer.newLine();
             }
 
@@ -36,4 +36,5 @@ public class Carregar {
             System.out.println("Erro ao criar o arquivo CSV: " + e);
         }
     }
+
 }

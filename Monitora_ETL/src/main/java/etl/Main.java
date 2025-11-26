@@ -8,14 +8,14 @@ import java.util.Date;
 
 public class Main {
 
-    private static final String URL = "jdbc:mysql://52.22.36.133:3306/monitora?useSSL=false&serverTimezone=America/Sao_Paulo";
+    private static final String URL = "jdbc:mysql://localhost:3306/monitora?useSSL=false&serverTimezone=America/Sao_Paulo";
     private static final String USER = "monitora";
     private static final String SENHA = "monitora@1234";
 
     public static void main(String[] args) {
         try (Connection conn = DriverManager.getConnection(URL, USER, SENHA)) {
 
-            File pasta = new File("src/Buckets/Raw/");
+            File pasta = new File("src\\Buckets\\Raw\\");
             //lista os arquivos da pasta que terminam com .csv
             File[] arquivos = pasta.listFiles((dir, nome) -> nome.endsWith(".csv"));
 
@@ -49,9 +49,9 @@ public class Main {
 
                 // buscando limites no banco
                 ParametroDAO parametroDAO = new ParametroDAO(conn);
-                Map<String, Map<String, Integer>> limites = parametroDAO.buscarLimites(idServidor);
-                Map<String, Integer> limitesCriticos = limites.get("critico");
-                Map<String, Integer> limitesAtencao = limites.get("atencao");
+                Map<String, Map<String, Double>> limites = parametroDAO.buscarLimites(idServidor);
+                Map<String, Double> limitesCriticos = limites.get("critico");
+                Map<String, Double> limitesAtencao = limites.get("atencao");
 
                 // transforma com base nos limites do banco
                 Transformar transformar = new Transformar(limitesCriticos, limitesAtencao);

@@ -10,10 +10,10 @@ public class ParametroDAO {
         this.conn = conn;
     }
 
-    public Map<String, Map<String, Integer>> buscarLimites(String  idServidor) {
-        Map<String, Integer> limitesCriticos = new HashMap<>();
-        Map<String, Integer> limitesAtencao = new HashMap<>();
-        Map<String, Map<String, Integer>> resultLimites = new HashMap<>();
+    public Map<String, Map<String, Double>> buscarLimites(String  idServidor) {
+        Map<String, Double> limitesCriticos = new HashMap<>();
+        Map<String, Double> limitesAtencao = new HashMap<>();
+        Map<String, Map<String, Double>> resultLimites = new HashMap<>();
 
 
         String sqlCritico = """
@@ -32,7 +32,7 @@ public class ParametroDAO {
 
             while (rs.next()) {
                  limitesCriticos.put(rs.getString("nome_componente"),
-                               rs.getInt("limite"));
+                               rs.getDouble("limite"));
             }
         } catch (SQLException e) {
             System.out.println("Erro ao buscar limites críticos: " + e.getMessage());
@@ -56,7 +56,7 @@ public class ParametroDAO {
 
             while (rs.next()) {
                limitesAtencao.put(rs.getString("nome_componente"),
-                               rs.getInt("limite"));
+                               rs.getDouble("limite"));
             }
         } catch (SQLException e) {
             System.out.println("Erro ao buscar limites de atenção: " + e.getMessage());
