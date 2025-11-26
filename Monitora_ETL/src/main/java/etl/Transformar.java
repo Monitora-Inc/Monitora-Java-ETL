@@ -128,9 +128,9 @@ public class Transformar {
 
             if (contCPU == 3) {
                 if (criticoCPU) {
-                    criarAlertaCritico(id, "CPU", timestamp, cpu, Integer.toString(limiteCpuCritico), "%");
+                    criarAlertaCritico(id, "CPU", timestamp, cpu, Double.toString(limiteCpuCritico), "%");
                 } else {
-                    criarAlertaAtencao(id, "CPU", timestamp, cpu, Integer.toString(limiteCpuAtencao), "%");
+                    criarAlertaAtencao(id, "CPU", timestamp, cpu, Double.toString(limiteCpuAtencao), "%");
                 }
             }
 
@@ -146,9 +146,9 @@ public class Transformar {
             }
             if (contRAM == 3) {
                 if (criticoRAM) {
-                    criarAlertaCritico(id, "Memória RAM", timestamp, ram, Integer.toString(limiteRamCritico), "%");
+                    criarAlertaCritico(id, "Memória RAM", timestamp, ram_percent, Double.toString(limiteRamCritico), "%");
                 } else {
-                    criarAlertaAtencao(id, "Memória RAM", timestamp, ram, Integer.toString(limiteRamAtencao), "%");
+                    criarAlertaAtencao(id, "Memória RAM", timestamp, ram_percent, Double.toString(limiteRamAtencao), "%");
                 }
             }
 
@@ -164,9 +164,9 @@ public class Transformar {
             }
             if (contDisco == 3) {
                 if (criticoDisco) {
-                    criarAlertaCritico(id, "Disco", timestamp, disco, Integer.toString(limiteDiscoCritico), "%");
+                    criarAlertaCritico(id, "Disco", timestamp, disco, Double.toString(limiteDiscoCritico), "%");
                 } else {
-                    criarAlertaAtencao(id, "Disco", timestamp, disco, Integer.toString(limiteDiscoAtencao), "%");
+                    criarAlertaAtencao(id, "Disco", timestamp, disco, Double.toString(limiteDiscoAtencao), "%");
                 }
             }
 
@@ -182,9 +182,9 @@ public class Transformar {
             }
             if (contUsoRede == 3) {
                 if (criticoUsoRede) {
-                    criarAlertaCritico(id, "Uso de Rede", timestamp, usoRede, Integer.toString(limiteUsoRedeCritico), "MB");
+                    criarAlertaCritico(id, "Uso de Rede", timestamp, usoRede, Double.toString(limiteUsoRedeCritico), "mb");
                 } else {
-                    criarAlertaAtencao(id, "Uso de Rede", timestamp, usoRede, Integer.toString(limiteUsoRedeCritico), "MB");
+                    criarAlertaAtencao(id, "Uso de Rede", timestamp, usoRede, Double.toString(limiteUsoRedeCritico), "mb");
                 }
             }
 
@@ -200,9 +200,9 @@ public class Transformar {
             }
             if (contLatencia == 3) {
                 if (criticoLatencia) {
-                    criarAlertaCritico(id, "Latência", timestamp, latencia, Double.toString(xlimiteLatenciaCritico), "ms");
+                    criarAlertaCritico(id, "Latência", timestamp, latencia, Double.toString(limiteLatenciaCritico), "ms");
                 } else {
-                    criarAlertaAtencao(id, "Latência", timestamp, latencia, Double.toString(xlimiteLatenciaCritico), "ms");
+                    criarAlertaAtencao(id, "Latência", timestamp, latencia, Double.toString(limiteLatenciaCritico), "ms");
                 }
             }
 
