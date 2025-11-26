@@ -6,10 +6,10 @@ import static etl.JiraIssueCreator.criarAlertaCritico;
 import static etl.JiraIssueCreator.criarAlertaAtencao;
 
 public class Transformar {
-    private Map<String, Integer> limitesCriticos;
-    private Map<String, Integer> limitesAtencao;
+    private Map<String, Double> limitesCriticos;
+    private Map<String, Double> limitesAtencao;
 
-    public Transformar(Map<String, Integer> limitesCriticos, Map<String, Integer> limitesAtencao) {
+    public Transformar(Map<String, Double> limitesCriticos, Map<String, Double> limitesAtencao) {
         this.limitesCriticos = limitesCriticos;
         this.limitesAtencao = limitesAtencao;
     }
@@ -32,7 +32,7 @@ public class Transformar {
         for (String[] col : dadosBrutos) {
 
             // pula a linha se não houver 8 colunas
-            if (col == null || col.length < 8)
+            if (col == null || col.length < 17)
                 continue;
 
             // ignora linha de cabeçalho
@@ -40,7 +40,7 @@ public class Transformar {
                 continue;
 
             boolean temNulo = false;
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 17; i++) {
                 if (col[i] == null || col[i].trim().isEmpty()) {
                     temNulo = true;
                     break;
@@ -52,31 +52,69 @@ public class Transformar {
             String id = col[0].trim();
             String timestamp = col[1].trim();// trim remove espaços
             double cpu = parseDouble(col[2]);
-            double ram = parseDouble(col[3]);
-            double disco = parseDouble(col[4]);
-            double usoRede = parseDouble(col[5]);
-            double latencia = parseDouble(col[6]);
-            int qtdProcessos = (int) parseDouble(col[7]);
+            double total_ram = parseDouble(col[3]);
+            double ram_usada = parseDouble(col[4]);
+            double ram_percent = parseDouble(col[5]);
+            double ram_quente = parseDouble(col[6]);
+            double ram_fria = parseDouble(col[7]);
+            double disco = parseDouble(col[8]);
+            int bytesEnv= (int) parseDouble(col[9]);
+            int bytesRecb= (int) parseDouble(col[10]);
+            double usoRede = (bytesEnv + bytesRecb)/(1048576);
+            double latencia = parseDouble(col[11]);
+            int pacotes_enviados =(int) parseDouble(col[12]);
+            int pacotes_recebidos =(int) parseDouble(col[13]);
+            int pacotes_perdidos =(int) parseDouble(col[14]);
+            int qtdProcessos = (int) parseDouble(col[15]);
+            int uptime_segundos = (int) parseDouble(col[16]);
+
+
 
             // busca limites do banco mas se não houver define valores padrao
-            int limiteCpuCritico = limitesCriticos.getOrDefault("CPU%", 90000) / 1000;
-            int limiteCpuAtencao = limitesAtencao.getOrDefault("CPU%", 80000) / 1000;
-
-            int limiteRamCritico = limitesCriticos.getOrDefault("RAM%", 85000) / 1000;
-            int limiteRamAtencao = limitesAtencao.getOrDefault("RAM%", 75000) / 1000;
-
-            int limiteDiscoCritico = limitesCriticos.getOrDefault("Disco%", 95000) / 1000;
-            int limiteDiscoAtencao = limitesAtencao.getOrDefault("Disco%", 85000) / 1000;
-
-            int limiteUsoRedeCritico = limitesCriticos.getOrDefault("Rede%", 90000) / 1000;
-            int limiteUsoRedeAtencao = limitesAtencao.getOrDefault("Rede%", 80000) / 1000;
-
-            int xlimiteLatenciaCritico = limitesCriticos.getOrDefault("Redems", 50);
-            int xlimiteLatenciaAtencao = limitesAtencao.getOrDefault("Redems", 40);
-            Double limiteLatenciaCritico = parseDouble(String.valueOf(xlimiteLatenciaCritico)) / 1000;
-            Double limiteLatenciaAtencao = parseDouble(String.valueOf(xlimiteLatenciaAtencao)) / 1000;
 
 
+            Double limiteCpuCritico = limitesCriticos.get("CPU%");
+            Double limiteCpuAtencao = limitesAtencao.get("CPU%");
+            if (limiteCpuAtencao == null){
+                limiteCpuAtencao = 80.0;
+            }
+            if (limiteCpuCritico == null){
+                limiteCpuCritico = 90.0;
+            }
+
+            Double limiteRamCritico = limitesCriticos.get("RAM%");
+            Double limiteRamAtencao = limitesAtencao.get("RAM%");
+            if (limiteRamCritico == null){
+                limiteRamCritico = 90.0;
+            }
+            if (limiteRamAtencao == null){
+                limiteRamAtencao = 80.0;
+            }
+
+            Double limiteDiscoCritico = limitesCriticos.get("Disco%");
+            Double limiteDiscoAtencao = limitesAtencao.get("Disco%");
+            if (limiteDiscoAtencao == null){
+                limiteDiscoAtencao = 80.0;
+            }
+            if (limiteDiscoCritico == null){
+                limiteDiscoCritico = 90.0;
+            }
+            Double limiteUsoRedeCritico = limitesCriticos.get("Redemb");
+            Double limiteUsoRedeAtencao = limitesAtencao.get("Redemb");
+            if (limiteUsoRedeAtencao == null){
+                limiteUsoRedeAtencao = 80.0;
+            }
+            if (limiteUsoRedeCritico == null){
+                limiteUsoRedeCritico = 90.0;
+            }
+            Double limiteLatenciaCritico = limitesCriticos.get("Redems");
+            Double limiteLatenciaAtencao = limitesAtencao.get("Redems");
+            if (limiteLatenciaAtencao == null){
+                limiteLatenciaAtencao = 0.05;
+            }
+            if (limiteLatenciaCritico == null){
+                limiteLatenciaCritico = 0.07;
+            }
             String statusCpu = getNivelAlerta(cpu, limiteCpuAtencao, limiteCpuCritico);
             if (cpu >= limiteCpuAtencao) {
                 contCPU++;
@@ -96,10 +134,10 @@ public class Transformar {
                 }
             }
 
-            String statusRam = getNivelAlerta(ram, limiteRamAtencao, limiteRamCritico);
-            if (ram >= limiteRamAtencao) {
+            String statusRam = getNivelAlerta(ram_percent, limiteRamAtencao, limiteRamCritico);
+            if (ram_percent >= limiteRamAtencao) {
                 contRAM++;
-                if (ram >= limiteRamCritico) {
+                if (ram_percent >= limiteRamCritico) {
                     criticoRAM = true;
                 }
             } else {
@@ -168,21 +206,37 @@ public class Transformar {
                 }
             }
 
-
             dadosTratados.add(new String[] {
-                    String.valueOf(id), timestamp,
+                    id,
+                    timestamp,
                     String.valueOf(cpu),
-                    String.valueOf(ram),
+                    String.valueOf(total_ram),
+                    String.valueOf(ram_usada),
+                    String.valueOf(ram_percent),
+                    String.valueOf(ram_quente),
+                    String.valueOf(ram_fria),
                     String.valueOf(disco),
+                    String.valueOf(bytesEnv),
+                    String.valueOf(bytesRecb),
                     String.valueOf(usoRede),
                     String.valueOf(latencia),
+                    String.valueOf(pacotes_enviados),
+                    String.valueOf(pacotes_recebidos),
+                    String.valueOf(pacotes_perdidos),
                     String.valueOf(qtdProcessos),
-                    statusCpu, statusRam, statusDisco, statusUsoRede, statusLatencia
+                    String.valueOf(uptime_segundos),
+                    statusCpu,
+                    statusRam,
+                    statusDisco,
+                    statusUsoRede,
+                    statusLatencia
             });
         }
 
         return dadosTratados;
     }
+
+
 
     private static double parseDouble(String s) {
         try {
