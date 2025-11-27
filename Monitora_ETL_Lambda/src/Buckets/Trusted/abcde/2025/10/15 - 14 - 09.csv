@@ -1,0 +1,1 @@
+id;timestamp;cpu;total_ram;ram_usada;ram_percent;ram_quente;ram_fria;disco_percent;bytesEnv;bytesRecb;usoRedeMb;latencia;pacotes_enviados;pacotes_recebidos;pacotes_perdidos;qtd_processos;uptime_segundos;statusCpu;statusRam;statusDisco;statusUsoRede;statusLatencia
