@@ -7,17 +7,18 @@ import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
-
-import com.monitora.dc.Extrair;
-import com.monitora.dc.Transformar;
-import com.monitora.dc.Carregar;
+import com.monitora.dc.dao.ServidorDAO;
+import com.monitora.dc.model.MetricaBruta;
+import com.monitora.dc.model.MetricaTratada;
+import com.monitora.dc.snapshot.SnapshotReader;
+import com.monitora.dc.snapshot.SnapshotWriter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LambdaHandler implements RequestHandler<S3Event, String> {
 
@@ -61,37 +62,70 @@ public class LambdaHandler implements RequestHandler<S3Event, String> {
             String ano = partes[2];
             String mes = partes[3];
             String dia = partes[4];
-            String nomeArquivo = partes[5];
             context.getLogger().log("Lendo SERVER UUID: " + uuidServidor);
 
             // 6. Conectação com banco
             String url = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName
                     + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo";
-            Connection conn = DriverManager.getConnection(url, dbUser, dbPass);
-            context.getLogger().log("Conexão com MySQL OK.");
+            try (Connection conn = DriverManager.getConnection(url, dbUser, dbPass);) {
+                context.getLogger().log("Conexão com MySQL OK.");
 
-            // 7. Buscar id do datacenter no banco
-            ServidorDAO dao = new ServidorDAO(conn);
-            Integer idDataCenter = dao.buscarDataCenterPorServidor(uuidServidor);
-            if (idDataCenter == null) {
-                throw new RuntimeException("Servidor não encontrado no banco: " + uuidServidor);
+                // 7. Buscar id do datacenter no banco
+                ServidorDAO dao = new ServidorDAO(conn);
+                Integer idDataCenter = dao.buscarDataCenterPorServidor(uuidServidor);
+                if (idDataCenter == null) {
+                    throw new RuntimeException("Servidor não encontrado no banco: " + uuidServidor);
+                }
+                context.getLogger().log("Servidor pertence ao DC: " + idDataCenter);
+
+                // 8. Diretório do client
+                String diretorioClient =
+                        idEmpresaPath + "/" + idDataCenter + "/snapshots/" + ano + "/" + mes + "/" + dia + "/";
+                context.getLogger().log("Prefixo de escrita no client: " + diretorioClient);
+
+                // 9. Extraindo do trusted
+                Extrair extrair = new Extrair();
+                List<MetricaBruta> brutas = extrair.extrair(csvInputStream);
+                context.getLogger().log("Linhas extraídas: " + brutas.size());
+
+                // 10. Transformando os dados
+                Transformar transformar = new Transformar();
+
+                Map<String, MetricaTratada> novasMetricas = new HashMap<>();
+                for (MetricaBruta b : brutas) {
+                    MetricaTratada t = transformar.transformar(b);
+                    novasMetricas.put(t.idServidor, t);
+                }
+
+                // 11. Lendo o csv anterior
+                SnapshotReader reader = new SnapshotReader(s3);
+
+                String snapshotAntigoKey = reader.buscarSnapshotMaisRecente(clientBucket, diretorioClient);
+
+                Map<String, MetricaTratada> mapa =
+                        (snapshotAntigoKey == null)
+                                ? new HashMap<>()
+                                : reader.lerSnapshot(clientBucket, snapshotAntigoKey);
+
+                // 12. Substituindo o servidor
+                for (String id : novasMetricas.keySet()) {
+                    mapa.put(id, novasMetricas.get(id));
+                }
+
+                // 13. Escrevendo o CSV
+                SnapshotWriter writer = new SnapshotWriter(s3);
+
+                String novoSnapshotKey =
+                        writer.salvarSnapshot(clientBucket, diretorioClient, mapa.values());
+
+                context.getLogger().log("Snapshot salvo em: " + novoSnapshotKey);
+
+                return "OK";
             }
-            context.getLogger().log("Servidor pertence ao DC: " + idDataCenter);
-
-            // 8. Diretório do client
-            String diretorioClient =
-                    idEmpresaPath + "/" +
-                            idDataCenter + "/snapshots/";
-            context.getLogger().log("Prefixo de escrita no client: " + diretorioClient);
-
-            // PARTE SEGUINTE: EXTRACT, TRANSFORM E SNAPSHOT
-
         } catch (Exception e) {
             context.getLogger().log("ERRO NA LAMBDA: " + e.getMessage());
             e.printStackTrace();
             return "ERRO: " + e.getMessage();
         }
-
-        return "OK";
     }
 }

@@ -1,4 +1,4 @@
-package com.monitora.dc;
+package com.monitora.dc.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
