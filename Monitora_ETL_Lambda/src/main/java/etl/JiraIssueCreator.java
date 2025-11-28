@@ -43,18 +43,18 @@ public class JiraIssueCreator {
                         + "  \"project\": {"
                         + "    \"key\": \"%s\""
                         + "  },"
-                        + "  \"summary\": \"" + mensagem + "\","
+                        + "  \"summary\": \"%s\","
                         + "  \"description\": {"
                         + "    \"type\": \"doc\","
                         + "    \"version\": 1,"
                         + "    \"content\": [{"
                         + "      \"type\": \"paragraph\","
                         + "      \"content\": [{"
-                        + "        \"text\": \"O componente " + componente + " ultrapassou os parâmetros definidos."
-                        + "\\nData e Hora da ocorrência: " + DataHora
-                        + "\\nServidor: " + idServidor
-                        + "\\nValor capturado: " + valorCapturado + unidadeMedida
-                        + "\\nParâmetro definido: " + parametro + unidadeMedida + "\","
+                        + "        \"text\": \"O componente %s ultrapassou os parâmetros definidos."
+                        + "\\nData e Hora da ocorrência: %s"
+                        + "\\nServidor: %s"
+                        + "\\nValor capturado: %s%s"
+                        + "\\nParâmetro definido: %s%s\","
                         + "        \"type\": \"text\""
                         + "      }]"
                         + "    }]"
@@ -63,12 +63,13 @@ public class JiraIssueCreator {
                         + "    \"name\": \"[System] Incident\""
                         + "  },"
                         + "  \"priority\": {"
-                        + "    \"name\": \"" + prioridade + "\""
+                        + "    \"name\": \"%s\""
                         + "  },"
-                        + "  \"customfield_10010\": \"240\""
+                        + "  \"customfield_10010\": \"240\","
+                        + "  \"customfield_10082\": \"%s\""
                         + "}"
                         + "}",
-                PROJECT_KEY);
+                PROJECT_KEY, mensagem, componente, DataHora, idServidor, valorCapturado, unidadeMedida, parametro, unidadeMedida, prioridade, componente);
 
         try (OutputStream os = conn.getOutputStream()) {
             byte[] input = jsonInputString.getBytes("utf-8");

@@ -15,6 +15,27 @@
     </properties>
 
     <dependencies>
+        <!-- Lambda core -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+
+        <!-- Eventos da Lambda (S3Event etc) -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
+            <version>3.11.0</version>
+        </dependency>
+
+        <!-- SDK v1 do S3 -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.11.822</version>
+        </dependency>
+
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

@@ -184,7 +184,7 @@ public class Transformar {
                 if (criticoUsoRede) {
                     criarAlertaCritico(id, "Uso de Rede", timestamp, usoRede, Double.toString(limiteUsoRedeCritico), "mb");
                 } else {
-                    criarAlertaAtencao(id, "Uso de Rede", timestamp, usoRede, Double.toString(limiteUsoRedeCritico), "mb");
+                    criarAlertaAtencao(id, "Uso de Rede", timestamp, usoRede, Double.toString(limiteUsoRedeAtencao), "mb");
                 }
             }
 
@@ -202,7 +202,7 @@ public class Transformar {
                 if (criticoLatencia) {
                     criarAlertaCritico(id, "Latência", timestamp, latencia, Double.toString(limiteLatenciaCritico), "ms");
                 } else {
-                    criarAlertaAtencao(id, "Latência", timestamp, latencia, Double.toString(limiteLatenciaCritico), "ms");
+                    criarAlertaAtencao(id, "Latência", timestamp, latencia, Double.toString(limiteLatenciaAtencao), "ms");
                 }
             }
 
