@@ -94,7 +94,7 @@ public class LambdaHandler implements RequestHandler<SNSEvent, String> {
 
                 // 9) Prefixo no bucket client
                 String diretorioClient =
-                        idEmpresaPath + "/" + idDataCenter + "/snapshots/" 
+                        idEmpresaPath + "/" + "dataCenter" + "/" + idDataCenter + "/snapshots/"
                         + ano + "/" + mes + "/" + dia + "/";
                 context.getLogger().log("Prefixo final: " + diretorioClient);
 
