@@ -60,7 +60,7 @@ public class Transformar {
             double disco = parseDouble(col[8]);
             int bytesEnv= (int) parseDouble(col[9]);
             int bytesRecb= (int) parseDouble(col[10]);
-            double usoRede = (bytesEnv + bytesRecb)/(1048576);
+            double usoRede = (bytesEnv + bytesRecb)/(20);
             double latencia = parseDouble(col[11]);
             int pacotes_enviados =(int) parseDouble(col[12]);
             int pacotes_recebidos =(int) parseDouble(col[13]);
