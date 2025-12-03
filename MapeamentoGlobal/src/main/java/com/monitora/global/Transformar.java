@@ -49,6 +49,7 @@ public class Transformar {
         mt.ramPercent = somaRam / total;
         mt.discoPercent = somaDisco / total;
         mt.redeMb = somaRede / total;
+        mt.redeMbS = (mt.redeMb / 3) / limiteMb*100;
 
         double latMed = somaLat / total;
 
