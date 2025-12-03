@@ -108,7 +108,7 @@ public class LambdaHandler implements RequestHandler<SNSEvent, String> {
                 Map<String, MetricaTratada> novasMetricas = new HashMap<>();
 
                 for (MetricaBruta b : brutas) {
-                    MetricaTratada t = transformar.transformar(b);
+                    MetricaTratada t = transformar.transformar(b, dao.buscarLimites(uuidServidor));
                     novasMetricas.put(t.idServidor, t);
                 }
 

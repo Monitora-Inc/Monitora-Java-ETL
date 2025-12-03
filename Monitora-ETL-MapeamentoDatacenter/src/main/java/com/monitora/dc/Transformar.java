@@ -4,7 +4,7 @@ import com.monitora.dc.model.MetricaTratada;
 
 public class Transformar {
 
-    public MetricaTratada transformar(MetricaBruta mb) {
+    public MetricaTratada transformar(MetricaBruta mb, Double limiteMb) {
         MetricaTratada mt = new MetricaTratada();
         mt.idServidor = mb.idServidor;
         mt.timestamp = mb.timestamp;
@@ -12,6 +12,7 @@ public class Transformar {
         mt.ramPercent = parseDouble(mb.ramPercent);
         mt.discoPercent = parseDouble(mb.discoPercent);
         mt.redeMb = parseDouble(mb.usoRedeMb);
+        mt.redeMbS = ((mt.redeMb / 3) / limiteMb) * 100;
         mt.latenciaMs = parseDouble(mb.latencia) * 1000.0;
         mt.processos = parseInt(mb.qtdProcessos);
         mt.saude = calcularSaude(mt);

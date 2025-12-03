@@ -22,7 +22,7 @@ public class SnapshotWriter {
 
         // 2. Construir conteúdo CSV
         StringBuilder sb = new StringBuilder();
-        sb.append("idServidor;timestamp;cpu;ram;disco;rede;latencia;processos;saude;up;cor\n");
+        sb.append("idServidor;timestamp;cpu;ram;disco;redeMB;redeMbS;latencia;processos;saude;up;cor\n");
         for (MetricaTratada m : servidores) {
             sb.append(m.idServidor).append(";")
                     .append(m.timestamp).append(";")
@@ -30,6 +30,7 @@ public class SnapshotWriter {
                     .append(m.ramPercent).append(";")
                     .append(m.discoPercent).append(";")
                     .append(m.redeMb).append(";")
+                    .append(m.redeMbS).append(";")
                     .append(m.latenciaMs).append(";")
                     .append(m.processos).append(";")
                     .append(m.saude).append(";")

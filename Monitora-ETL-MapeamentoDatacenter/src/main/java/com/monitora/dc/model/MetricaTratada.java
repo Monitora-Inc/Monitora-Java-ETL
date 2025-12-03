@@ -7,6 +7,7 @@ public class MetricaTratada {
     public double ramPercent;
     public double discoPercent;
     public double redeMb;
+    public double redeMbS;
     public double latenciaMs;
     public int processos;
     public double saude;
