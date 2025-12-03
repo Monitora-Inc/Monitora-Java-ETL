@@ -14,13 +14,14 @@ public class SnapshotWriter {
 
     public String salvar(String bucket, String key, MetricaTratada t) throws Exception {
         StringBuilder sb = new StringBuilder();
-        sb.append("idDataCenter;timestamp;cpu;ram;disco;rede;saude;cor;up;diferenca\n");
+        sb.append("idDataCenter;timestamp;cpu;ram;disco;redeMb; redeMbS;saude;cor;up;diferenca\n");
         sb.append(t.idDataCenter).append(";")
                 .append(t.timestamp).append(";")
                 .append(t.cpuPercent).append(";")
                 .append(t.ramPercent).append(";")
                 .append(t.discoPercent).append(";")
                 .append(t.redeMb).append(";")
+                .append(t.redeMbS).append(";")
                 .append(t.saude).append(";")
                 .append(t.cor).append(";")
                 .append(t.up).append(";")

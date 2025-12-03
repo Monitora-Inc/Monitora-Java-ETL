@@ -16,6 +16,7 @@ import com.monitora.global.model.MetricaTratada;
 import com.monitora.global.snapshot.SnapshotWriter;
 import com.monitora.global.dao.DataCenterDAO;
 
+
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -105,6 +106,7 @@ public class LambdaHandler implements RequestHandler<SNSEvent, String> {
                     + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo";
 
             Integer idDataCenter;
+            Double limite;
 
             try (Connection conn = DriverManager.getConnection(url, dbUser, dbPass)) {
                 DataCenterDAO dao = new DataCenterDAO(conn);
@@ -115,6 +117,13 @@ public class LambdaHandler implements RequestHandler<SNSEvent, String> {
                 }
 
                 context.getLogger().log("idDataCenter encontrado: " + idDataCenter);
+
+                limite = dao.buscarLimites(idDataCenter);
+                if (limite == null) {
+                    throw new RuntimeException("Limites não encontrados para o datacenter: " + idDataCenter);
+                }
+
+                context.getLogger().log("Limites encontrados: " + limite);
             }
 
             // -----------------------------------------------------------
@@ -122,7 +131,7 @@ public class LambdaHandler implements RequestHandler<SNSEvent, String> {
             // -----------------------------------------------------------
             Transformar transformar = new Transformar();
             MetricaTratada tratada =
-                    transformar.transformar(String.valueOf(idDataCenter), brutas);
+                    transformar.transformar(String.valueOf(idDataCenter), brutas, limite);
 
             // -----------------------------------------------------------
             // 8) MONTAR CAMINHO DO BUCKET DESTINO

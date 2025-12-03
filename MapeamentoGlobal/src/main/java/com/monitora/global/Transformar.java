@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class Transformar {
-    public MetricaTratada transformar(String idDataCenter, List<MetricaBruta> brutas) {
+    public MetricaTratada transformar(String idDataCenter, List<MetricaBruta> brutas, double limiteMb) {
 
         MetricaTratada mt = new MetricaTratada();
 
