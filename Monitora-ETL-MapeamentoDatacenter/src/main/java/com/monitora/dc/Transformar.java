@@ -12,7 +12,7 @@ public class Transformar {
         mt.ramPercent = parseDouble(mb.ramPercent);
         mt.discoPercent = parseDouble(mb.discoPercent);
         mt.redeMb = parseDouble(mb.usoRedeMb);
-        mt.redeMbS = ((mt.redeMb / 3) / limiteMb) * 100;
+        mt.redeMbS = ((mt.redeMb / 60) / limiteMb) * 100;
         mt.latenciaMs = parseDouble(mb.latencia) * 1000.0;
         mt.processos = parseInt(mb.qtdProcessos);
         mt.saude = calcularSaude(mt);
@@ -24,14 +24,17 @@ public class Transformar {
         try {
             return Double.parseDouble(v);
         } catch (Exception e) {
+
             return 0.0;
         }
     }
 
     private int parseInt(String v) {
         try {
+            System.out.println(v);
             return Integer.parseInt(v);
         } catch (Exception e) {
+            System.out.println(v);
             return 0;
         }
     }

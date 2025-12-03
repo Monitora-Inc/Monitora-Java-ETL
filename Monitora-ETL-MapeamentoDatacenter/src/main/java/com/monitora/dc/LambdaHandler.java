@@ -108,11 +108,15 @@ public class LambdaHandler implements RequestHandler<SNSEvent, String> {
                 Map<String, MetricaTratada> novasMetricas = new HashMap<>();
 
                 for (MetricaBruta b : brutas) {
-                    MetricaTratada t = transformar.transformar(b, dao.buscarLimites(uuidServidor));
+                    Double limites = dao.buscarLimites(uuidServidor);
+                    System.out.println(limites);
+                    MetricaTratada t = transformar.transformar(b, limites);
                     novasMetricas.put(t.idServidor, t);
+
                 }
 
-                // 12) Ler snapshot anterior
+
+                System.out.println("12) Ler snapshot anterior");
                 SnapshotReader reader = new SnapshotReader(s3);
                 String snapshotAntigoKey = reader.buscarSnapshotMaisRecente(clientBucket, diretorioClient);
 
@@ -121,10 +125,10 @@ public class LambdaHandler implements RequestHandler<SNSEvent, String> {
                                 ? new HashMap<>()
                                 : reader.lerSnapshot(clientBucket, snapshotAntigoKey);
 
-                // 13) Mesclar métricas novas
+                System.out.println("13) Mesclar métricas novas");
                 mapa.putAll(novasMetricas);
 
-                // 14) Escrever novo snapshot
+                System.out.println("14) Escrever novo snapshot");
                 SnapshotWriter writer = new SnapshotWriter(s3);
                 String novoSnapshotKey =
                         writer.salvarSnapshot(clientBucket, diretorioClient, mapa.values());

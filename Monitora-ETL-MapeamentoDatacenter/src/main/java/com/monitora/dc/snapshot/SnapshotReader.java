@@ -44,7 +44,7 @@ public class SnapshotReader {
             while ((linha = reader.readLine()) != null) {
                 if (linha.trim().isEmpty()) continue;
                 String[] col = linha.split(";");
-                if (col.length < 11) continue;
+                if (col.length < 12) continue;
                 MetricaTratada mt = new MetricaTratada();
                 mt.idServidor = col[0];
                 mt.timestamp = col[1];
@@ -52,11 +52,12 @@ public class SnapshotReader {
                 mt.ramPercent = Double.parseDouble(col[3]);
                 mt.discoPercent = Double.parseDouble(col[4]);
                 mt.redeMb = Double.parseDouble(col[5]);
-                mt.latenciaMs = Double.parseDouble(col[6]);
-                mt.processos = Integer.parseInt(col[7]);
-                mt.saude = Double.parseDouble(col[8]);
-                mt.up = Boolean.parseBoolean(col[9]);
-                mt.cor = col[10];
+                mt.redeMbS = Double.parseDouble(col[6]);
+                mt.latenciaMs = Double.parseDouble(col[7]);
+                mt.processos = Integer.parseInt(col[8]);
+                mt.saude = Double.parseDouble(col[9]);
+                mt.up = Boolean.parseBoolean(col[10]);
+                mt.cor = col[11];
                 map.put(mt.idServidor, mt);
             }
         }
